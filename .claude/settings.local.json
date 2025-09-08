@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install)",
+      "Bash(npm run test:stocks:*)",
+      "Bash(tsx:*)",
+      "Bash(npx tsx:*)",
+      "Bash(npm run test:blog:*)",
+      "Bash(npm run test:email:*)",
+      "Bash(npm run build:*)",
+      "Bash(node:*)",
+      "Bash(NODE_ENV=production node dist/scheduler.js)",
+      "Bash(NODE_ENV=production npx tsx src/scheduler.ts)",
+      "Bash(npm run:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
