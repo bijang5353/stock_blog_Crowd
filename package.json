@@ -13,6 +13,7 @@
     "test:stocks": "npx tsx src/test/test-stocks.js",
     "test:blog": "npx tsx src/test/test-blog.js",
     "test:email": "npx tsx src/test/test-email.js",
+    "test:railway": "npm run build && node test-railway.js",
     "clean": "rm -rf dist"
   },
   "dependencies": {
