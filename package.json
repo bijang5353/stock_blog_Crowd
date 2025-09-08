@@ -6,7 +6,7 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
-    "start": "npm run build && NODE_ENV=production node dist/scheduler.js",
+    "start": "npm run build && node test-railway.js",
     "dev": "tsx src/index.ts",
     "scheduler": "npm run build && node dist/scheduler.js",
     "scheduler:dev": "NODE_ENV=development tsx src/scheduler.ts",
