@@ -35,12 +35,13 @@ jobs:
           NODE_ENV: production
           EMAIL_USER: ${{ secrets.EMAIL_USER }}
           EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
-        run: node -e "
+        run: |
+          node -e "
           import('./dist/scheduler.js').then(({ StockBlogScheduler }) => {
             const scheduler = new StockBlogScheduler();
             return scheduler.runDailyBlogGeneration();
           }).catch(console.error);
-        "
+          "
         
       - name: Send evening report (6PM)
         if: github.event.schedule == '0 9 * * 1-5'
@@ -48,12 +49,13 @@ jobs:
           NODE_ENV: production
           EMAIL_USER: ${{ secrets.EMAIL_USER }}
           EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
-        run: node -e "
+        run: |
+          node -e "
           import('./dist/scheduler.js').then(({ StockBlogScheduler }) => {
             const scheduler = new StockBlogScheduler();
             return scheduler.runEveningBlogGeneration();
           }).catch(console.error);
-        "
+          "
         
       - name: Manual test run
         if: github.event_name == 'workflow_dispatch'
@@ -61,10 +63,11 @@ jobs:
           NODE_ENV: production
           EMAIL_USER: ${{ secrets.EMAIL_USER }}
           EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
-        run: node -e "
+        run: |
+          node -e "
           import('./dist/scheduler.js').then(({ StockBlogScheduler }) => {
             const scheduler = new StockBlogScheduler();
             console.log('🧪 수동 테스트 실행');
             return scheduler.runDailyBlogGeneration();
           }).catch(console.error);
-        "
+          "
