@@ -1,0 +1,42 @@
+name: Daily Stock Blog
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * *'
+    - cron: '0 9 * * 1-5'
+
+jobs:
+  send-email:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - run: npm ci
+      
+      - run: npm run build
+      
+      - name: Send stock blog email
+        env:
+          EMAIL_USER: ${{ secrets.EMAIL_USER }}
+          EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+          NODE_ENV: production
+        run: |
+          cat > run-stock-blog.js << 'EOF'
+          import { StockBlogScheduler } from './dist/scheduler.js';
+          
+          const scheduler = new StockBlogScheduler();
+          scheduler.runDailyBlogGeneration()
+            .then(() => console.log('✅ 성공'))
+            .catch(err => {
+              console.error('❌ 실패:', err);
+              process.exit(1);
+            });
+          EOF
+          
+          node run-stock-blog.js
