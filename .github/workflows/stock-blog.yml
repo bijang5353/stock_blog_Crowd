@@ -2,11 +2,8 @@ name: Daily Stock Blog
 
 on:
   schedule:
-    # 매일 오전 9시 (한국시간 = UTC+9, 즉 UTC 0시)
-    - cron: '0 0 * * *'
-    # 평일 오후 6시 (한국시간 = UTC 9시)  
-    - cron: '0 9 * * 1-5'
-  # 수동 실행도 가능
+    - cron: '0 0 * * *'  # 매일 오전 9시 (한국시간)
+    - cron: '0 9 * * 1-5'  # 평일 오후 6시 (한국시간)
   workflow_dispatch:
 
 jobs:
@@ -29,45 +26,28 @@ jobs:
       - name: Build project
         run: npm run build
         
-      - name: Send morning briefing (9AM)
-        if: github.event.schedule == '0 0 * * *'
-        env:
-          NODE_ENV: production
-          EMAIL_USER: ${{ secrets.EMAIL_USER }}
-          EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+      - name: Create test script
         run: |
-          node -e "
-          import('./dist/scheduler.js').then(({ StockBlogScheduler }) => {
-            const scheduler = new StockBlogScheduler();
-            return scheduler.runDailyBlogGeneration();
-          }).catch(console.error);
-          "
+          cat > test-github-actions.js << 'EOF'
+          process.env.NODE_ENV = 'production';
+          
+          import { StockBlogScheduler } from './dist/scheduler.js';
+          
+          console.log('🚀 GitHub Actions 테스트 시작...');
+          const scheduler = new StockBlogScheduler();
+          
+          try {
+            await scheduler.runDailyBlogGeneration();
+            console.log('✅ 테스트 성공!');
+          } catch (error) {
+            console.error('❌ 테스트 실패:', error);
+            process.exit(1);
+          }
+          EOF
         
-      - name: Send evening report (6PM)
-        if: github.event.schedule == '0 9 * * 1-5'
+      - name: Run stock blog generation
         env:
           NODE_ENV: production
           EMAIL_USER: ${{ secrets.EMAIL_USER }}
           EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
-        run: |
-          node -e "
-          import('./dist/scheduler.js').then(({ StockBlogScheduler }) => {
-            const scheduler = new StockBlogScheduler();
-            return scheduler.runEveningBlogGeneration();
-          }).catch(console.error);
-          "
-        
-      - name: Manual test run
-        if: github.event_name == 'workflow_dispatch'
-        env:
-          NODE_ENV: production
-          EMAIL_USER: ${{ secrets.EMAIL_USER }}
-          EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
-        run: |
-          node -e "
-          import('./dist/scheduler.js').then(({ StockBlogScheduler }) => {
-            const scheduler = new StockBlogScheduler();
-            console.log('🧪 수동 테스트 실행');
-            return scheduler.runDailyBlogGeneration();
-          }).catch(console.error);
-          "
+        run: node test-github-actions.js
